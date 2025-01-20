@@ -6,8 +6,8 @@
 #include <string.h>
 #define STRING_VERSION_MAJOR 0
 #define STRING_VERSION_MINOR 0
-#define STRING_VERSION_PATCH 2
-#define STRING_VERSION "0.0.2"
+#define STRING_VERSION_PATCH 3
+#define STRING_VERSION "0.0.3"
 
 #ifndef STRINGAPI
     #define STRINGAPI extern
@@ -32,7 +32,7 @@ typedef struct {
 } string_t;
 STRINGAPI string_t string_init(char* str, string_arena_t* arena);
 STRINGAPI string_t string_concat(string_t str1, string_t str2, string_arena_t* arena);
-STRINGAPI void string_append(string_t* dest, string_t src, string_arena_t* arena);
+STRINGAPI string_t string_append(string_t str1, string_t str2, string_arena_t* arena);
 STRINGAPI int string_compare(string_t str1, string_t str2);
 STRINGAPI string_t string_substring(string_t str, size_t start, size_t length, string_arena_t* arena);
 STRINGAPI string_t string_trim(string_t str, string_arena_t* arena);
@@ -50,7 +50,7 @@ STRINGAPI string_array_t string_split(string_t str, char delimiter, string_arena
 #define ArenaFree() string_arena_free(&global_arena)
 #define String(str) string_init(str, &global_arena)
 #define Concat(str1, str2) string_concat(str1, str2, &global_arena)
-#define Append(dest, src) string_append(dest, src, &global_arena)
+#define Append(str1, str2) string_append(str1, str2, &global_arena)
 #define Compare string_compare
 #define Substring(src, start, len) string_substring(src, start, len, &global_arena)
 #define Trim(src) string_trim(src, &global_arena)
@@ -156,24 +156,27 @@ STRINGAPI string_t string_concat(string_t str1, string_t str2, string_arena_t* a
 
     return result;
 }
-STRINGAPI void string_append(string_t* dest, string_t src, string_arena_t* arena)
-{
-    size_t new_length = dest->length + src.length;
 
-    char* new_chars = (char*)stralloc(arena, new_length + 1); // +1 for null terminator
+STRINGAPI string_t string_append(string_t str1, string_t str2, string_arena_t* arena) {
+    size_t new_length = str1.length + str2.length;
 
-    if (new_chars == NULL) {
-        return;
+    char* new_chars = (char*) stralloc(arena, new_length + 1);
+
+    if (!new_chars) {
+        string_t empty = { .chars = NULL, .length = 0 };
+        return empty;
     }
 
-    memcpy(new_chars, dest->chars, dest->length);
-
-    memcpy(new_chars + dest->length, src.chars, src.length);
+    memcpy(new_chars, str1.chars, str1.length);
+    memcpy(new_chars + str1.length, str2.chars, str2.length);
 
     new_chars[new_length] = '\0';
 
-    dest->chars = new_chars;
-    dest->length = new_length;
+    string_t result = {
+        .chars = new_chars,
+        .length = new_length
+    };
+    return result;
 }
 
 STRINGAPI int string_compare(string_t str1, string_t str2)

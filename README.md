@@ -20,7 +20,7 @@ int main()
     string_t str = String("Hello ");
     string_t str1 = String("World");
     string_t hello = Concat(str, str1);
-    Append(&hello, String(" and something else   "));
+    hello = Append(hello, String(" and something else   "));
     hello = Trim(hello);
 
     printf("'%s'\n", hello.chars);
