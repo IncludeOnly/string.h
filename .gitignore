@@ -1,0 +1,5 @@
+.cache
+.changelog
+main*
+*.so
+*.c
