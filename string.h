@@ -6,8 +6,8 @@
 #include <string.h>
 #define STRING_VERSION_MAJOR 0
 #define STRING_VERSION_MINOR 0
-#define STRING_VERSION_PATCH 1
-#define STRING_VERSION "0.0.1"
+#define STRING_VERSION_PATCH 2
+#define STRING_VERSION "0.0.2"
 
 #ifndef STRINGAPI
     #define STRINGAPI extern
@@ -37,6 +37,7 @@ STRINGAPI int string_compare(string_t str1, string_t str2);
 STRINGAPI string_t string_substring(string_t str, size_t start, size_t length, string_arena_t* arena);
 STRINGAPI string_t string_trim(string_t str, string_arena_t* arena);
 STRINGAPI void string_clear(string_t* str);
+STRINGAPI char string_char_at(string_t str, size_t index);
 
 typedef struct {
     string_t* strings;
@@ -44,19 +45,18 @@ typedef struct {
 } string_array_t;
 STRINGAPI string_array_t string_split(string_t str, char delimiter, string_arena_t* arena);
 
-#ifndef STRING_DISABLE_BEAUTIFY
 
-#define ArenaInit string_arena_init
-#define ArenaFree string_arena_free
-#define String string_init
-#define Concat string_concat
-#define Append string_append
+#define ArenaInit(size) string_arena_init(&global_arena, size)
+#define ArenaFree() string_arena_free(&global_arena)
+#define String(str) string_init(str, &global_arena)
+#define Concat(str1, str2) string_concat(str1, str2, &global_arena)
+#define Append(dest, src) string_append(dest, src, &global_arena)
 #define Compare string_compare
-#define Substring string_substring
-#define Trim string_trim
+#define Substring(src, start, len) string_substring(src, start, len, &global_arena)
+#define Trim(src) string_trim(src, &global_arena)
 #define Clear string_clear
-
-#endif // STRING_DISABLE_BEAUTIFY
+#define CharAt string_char_at
+#define Split(src, delim) string_split(src, delim, &global_arena)
 
 #endif // STRING_H
 
@@ -65,6 +65,9 @@ STRINGAPI string_array_t string_split(string_t str, char delimiter, string_arena
 #ifdef STRING_IMPLEMENTATION
 
 #include <assert.h>
+
+static string_arena_t global_arena = {0};
+static int global_arena_initialized = 0;
 
 
 static size_t string_len(char* string)
@@ -248,6 +251,14 @@ STRINGAPI void string_clear(string_t* str)
     str->chars = NULL;
     str->length = 0;
 }
+
+STRINGAPI char string_char_at(string_t str, size_t index)
+{
+    if(index > str.length) return '\0';
+    return str.chars[index];
+}
+
+
 #undef stralloc
 
 #endif // STRING_IMPLEMENTATION

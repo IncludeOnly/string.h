@@ -15,21 +15,26 @@ wget https://raw.githubusercontent.com/IncludeOnly/string.h/refs/heads/main/stri
 
 int main()
 {
-    string_arena_t arena;
-    ArenaInit(&arena, 1024);
+    ArenaInit(1024);
 
-    string_t str = String("Hello ", &arena);
-    string_t str1 = String("World", &arena);
-    string_t hello = Concat(str, str1, &arena);
-    string_t everyone = String(" and something else   ", &arena);
-    Append(&hello, everyone, &arena);
-    hello = Trim(hello, &arena);
+    string_t str = String("Hello ");
+    string_t str1 = String("World");
+    string_t hello = Concat(str, str1);
+    Append(&hello, String(" and something else   "));
+    hello = Trim(hello);
+
     printf("'%s'\n", hello.chars);
-    printf("%d\n", Compare(str, str));
+    printf("%d\n", Compare(str, str1));
+    printf("%s\n", Substring(hello, 5, 11).chars);
+    printf("'%c'\n", CharAt(hello, 6));
 
-    printf("%s\n", Substring(hello, 5, 11, &arena).chars);
+    string_array_t words = Split(hello, ' ');
+    for(size_t i = 0; i < words.count; i++){
+        printf("%s\n", words.strings[i].chars);
+    }
 
-    ArenaFree(&arena);
+    ArenaFree();
+
     return 0;
 }
 ```
