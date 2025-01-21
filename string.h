@@ -61,7 +61,6 @@ STRINGAPI string_array_t string_split(string_t str, char delimiter, string_arena
 #endif // STRING_H
 
 
-#define STRING_IMPLEMENTATION
 #ifdef STRING_IMPLEMENTATION
 
 #include <assert.h>
@@ -245,6 +244,7 @@ STRINGAPI string_array_t string_split(string_t str, char delimiter, string_arena
     if (start < str.length) {
         result.strings[result.count++] = string_substring(str, start, str.length - start, arena);
     }
+    result.count--;
 
     return result;
 }
